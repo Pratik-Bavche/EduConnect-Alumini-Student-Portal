@@ -53,7 +53,11 @@ router.post('/register', async (req, res) => {
             ...otherDetails
         };
 
+        console.log('Attempting to save user to collection:', Model.collection.name);
+        console.log('Data:', userData);
+
         const user = await Model.create(userData);
+        console.log('User saved successfully:', user);
 
         if (user) {
             res.status(201).json({
