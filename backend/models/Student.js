@@ -1,0 +1,20 @@
+import mongoose from 'mongoose';
+
+const studentSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, default: 'student' },
+
+    // Student Specific Details
+    rollNo: { type: String, required: true },
+    year: { type: String, required: true },
+    division: { type: String, required: true },
+    prn: { type: String },
+    branch: { type: String },
+
+    isVerified: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+
+export default mongoose.model('Student', studentSchema);
