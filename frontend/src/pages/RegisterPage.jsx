@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -34,12 +35,30 @@ const RegisterPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
+
+        try {
+            const response = await fetch('http://localhost:5000/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                toast.success("Registration Successful! Please login.");
+                navigate('/login');
+            } else {
+                toast.error(data.message || "Registration failed");
+            }
+        } catch (error) {
+            console.error("Registration Error:", error);
+            toast.error("Something went wrong. Is the backend running?");
+        } finally {
             setIsLoading(false);
-            alert("Registration Submitted! Account is PENDING verification.");
-            navigate('/login');
-        }, 2000);
+        }
     };
 
     // Helper to render current step content

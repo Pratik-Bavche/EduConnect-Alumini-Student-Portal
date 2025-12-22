@@ -5,21 +5,45 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, ArrowLeft, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [role, setRole] = useState('student'); // 'student' | 'staff' | 'admin'
 
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
+
+        try {
+            const response = await fetch('http://localhost:5000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Save token and user details
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data));
+
+                toast.success(`Login Successful! Welcome ${data.name}`);
+                navigate('/'); // Redirect to Dashboard/Home
+            } else {
+                toast.error(data.message || "Invalid credentials");
+            }
+        } catch (error) {
+            console.error("Login Error:", error);
+            toast.error("Unable to connect to server");
+        } finally {
             setIsLoading(false);
-            // For demo, just alert
-            alert(`Logging in as ${role}... Backend not connected yet.`);
-        }, 1500);
+        }
     };
 
     return (
@@ -70,6 +94,8 @@ const LoginPage = () => {
                             <Input
                                 id="email"
                                 placeholder={role === 'student' ? "e.g. 3A01 or student@example.com" : "admin@college.edu"}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 required
                             />
                         </div>
@@ -81,7 +107,13 @@ const LoginPage = () => {
                                     Forgot password?
                                 </a>
                             </div>
-                            <Input id="password" type="password" required />
+                            <Input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
                         </div>
 
                         <Button type="submit" className="w-full rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all cursor-pointer" disabled={isLoading}>

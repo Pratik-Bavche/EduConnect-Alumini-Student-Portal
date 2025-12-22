@@ -19,6 +19,19 @@ router.post('/register', async (req, res) => {
     const { name, email, password, role, ...otherDetails } = req.body;
 
     try {
+        // Validation: Basic Fields
+        if (!name || !email || !password || !role) {
+            return res.status(400).json({ message: 'Please fill all required fields' });
+        }
+
+        // Validation: Role-specific fields
+        if (role === 'student' && (!otherDetails.rollNo || !otherDetails.year || !otherDetails.division)) {
+            return res.status(400).json({ message: 'Please provide all academic details (Roll No, Year, Division)' });
+        }
+        if (role === 'staff' && (!otherDetails.department || !otherDetails.designation)) {
+            return res.status(400).json({ message: 'Please provide all staff details (Department, Designation)' });
+        }
+
         // 1. Check if user exists
         const userExists = await User.findOne({ email });
         if (userExists) {
@@ -62,6 +75,11 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        // Validation
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Please provide email and password' });
+        }
+
         const user = await User.findOne({ email });
 
         if (user && (await bcrypt.compare(password, user.password))) {
