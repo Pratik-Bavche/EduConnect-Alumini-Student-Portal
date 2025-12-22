@@ -1,0 +1,122 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { GraduationCap, ArrowLeft, Loader2 } from "lucide-react";
+
+const LoginPage = () => {
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+    const [role, setRole] = useState('student'); // 'student' | 'staff' | 'admin'
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        // Simulate API call
+        setTimeout(() => {
+            setIsLoading(false);
+            // For demo, just alert
+            alert(`Logging in as ${role}... Backend not connected yet.`);
+        }, 1500);
+    };
+
+    return (
+        <div className="min-h-screen bg-secondary/30 flex items-center justify-center p-4">
+            <div className="absolute top-4 left-4">
+                <Button
+                    variant="ghost"
+                    onClick={() => navigate('/')}
+                    className="group flex items-center gap-2 hover:bg-white hover:text-blue-600 transition-all rounded-full px-4 cursor-pointer shadow-sm hover:shadow-md"
+                >
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+                </Button>
+            </div>
+
+            <Card className="w-full max-w-md border-border/50 shadow-xl bg-background/95 backdrop-blur">
+                <CardHeader className="text-center space-y-2">
+                    <div className="mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-2">
+                        <GraduationCap className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+                    <CardDescription>
+                        Enter your credentials to access the portal
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        {/* Role Selection Tabs (Simplified) */}
+                        <div className="grid grid-cols-3 gap-2 mb-6 p-1 bg-secondary rounded-lg">
+                            {['student', 'staff', 'admin'].map((r) => (
+                                <button
+                                    key={r}
+                                    type="button"
+                                    onClick={() => setRole(r)}
+                                    className={`text-sm font-medium py-1.5 rounded-md transition-all cursor-pointer ${role === r
+                                        ? 'bg-background shadow-sm text-foreground'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                >
+                                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="email">
+                                {role === 'student' ? 'Email or Roll Number' : 'Email Address'}
+                            </Label>
+                            <Input
+                                id="email"
+                                placeholder={role === 'student' ? "e.g. 3A01 or student@example.com" : "admin@college.edu"}
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="password">Password</Label>
+                                <a href="#" className="text-xs text-primary hover:underline">
+                                    Forgot password?
+                                </a>
+                            </div>
+                            <Input id="password" type="password" required />
+                        </div>
+
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Signing in...
+                                </>
+                            ) : (
+                                "Sign In"
+                            )}
+                        </Button>
+                    </form>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-4 text-center text-sm text-muted-foreground">
+                    {role === 'student' && (
+                        <p>
+                            Don't have an account?{" "}
+                            <button
+                                onClick={() => navigate('/register')}
+                                className="text-primary font-medium hover:underline hover:text-blue-700 cursor-pointer transition-colors"
+                            >
+                                Register here
+                            </button>
+                        </p>
+                    )}
+                    {role !== 'student' && (
+                        <p className="text-xs">
+                            Admin & Staff accounts are created by the organization.
+                        </p>
+                    )}
+                </CardFooter>
+            </Card>
+        </div>
+    );
+};
+
+export default LoginPage;
