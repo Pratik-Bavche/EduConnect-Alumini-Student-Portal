@@ -36,13 +36,19 @@ const RegisterPage = () => {
         e.preventDefault();
         setIsLoading(true);
 
+        // Prepare payload: Combine firstName/lastName into 'name'
+        const payload = {
+            ...formData,
+            name: `${formData.firstName} ${formData.lastName}`,
+        };
+
         try {
             const response = await fetch('http://localhost:5000/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(payload),
             });
 
             const data = await response.json();
