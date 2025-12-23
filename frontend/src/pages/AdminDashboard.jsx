@@ -29,6 +29,13 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+    // --- Mock Data ---
+    const [pendingStaff, setPendingStaff] = useState([
+        { id: 1, name: 'Mr. Amit Verma', email: 'amit@dypcoe.edu', dept: 'CSE', role: 'Staff', status: 'Pending', assignedYear: '3rd Year' },
+        { id: 2, name: 'Ms. Priya Singh', email: 'priya@dypcoe.edu', dept: 'ENTC', role: 'Staff', status: 'Pending', assignedYear: '2nd Year' },
+        { id: 3, name: 'Dr. R.K. Patil', email: 'rkpatil@dypcoe.edu', dept: 'Mech', role: 'Staff', status: 'Pending', assignedYear: '4th Year' },
+    ]);
+
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (!storedUser) {
@@ -58,12 +65,7 @@ const AdminDashboard = () => {
         navigate('/');
     };
 
-    // --- Mock Data ---
-    const [pendingStaff, setPendingStaff] = useState([
-        { id: 1, name: 'Mr. Amit Verma', email: 'amit@dypcoe.edu', dept: 'CSE', role: 'Staff', status: 'Pending', assignedYear: '3rd Year' },
-        { id: 2, name: 'Ms. Priya Singh', email: 'priya@dypcoe.edu', dept: 'ENTC', role: 'Staff', status: 'Pending', assignedYear: '2nd Year' },
-        { id: 3, name: 'Dr. R.K. Patil', email: 'rkpatil@dypcoe.edu', dept: 'Mech', role: 'Staff', status: 'Pending', assignedYear: '4th Year' },
-    ]);
+
 
     const handleAssignYearChange = (id, newYear) => {
         setPendingStaff(pendingStaff.map(s => s.id === id ? { ...s, assignedYear: newYear } : s));
