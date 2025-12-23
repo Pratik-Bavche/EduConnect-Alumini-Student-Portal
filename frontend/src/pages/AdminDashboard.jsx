@@ -42,7 +42,14 @@ const AdminDashboard = () => {
         setUser(parsedUser);
     }, [navigate]);
 
-    if (!user) return null;
+    if (!user) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600">Loading Dashboard...</span>
+            </div>
+        );
+    }
 
     const handleLogout = () => {
         localStorage.removeItem('token');

@@ -110,7 +110,7 @@ const LoginPage = () => {
                                         ? "e.g. 3A01 or student@example.com"
                                         : role === 'staff'
                                             ? "staff@gmail.com"
-                                            : "admin@college.edu"
+                                            : "admin@admin.com"
                                 }
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
