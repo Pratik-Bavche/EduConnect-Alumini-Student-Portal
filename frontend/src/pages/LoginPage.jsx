@@ -35,6 +35,7 @@ const LoginPage = () => {
                 localStorage.setItem('user', JSON.stringify(data));
 
                 toast.success(`Login Successful! Welcome ${data.name}`);
+                console.log("Login Role:", data.role); // Debugging
 
                 if (data.role === 'student' || data.role === 'alumni') {
                     navigate('/student-dashboard');

@@ -27,7 +27,21 @@ const StudentDashboard = () => {
             navigate('/login');
             return;
         }
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+
+        // RBAC Check: Ensure only Students/Alumni access this page
+        if (parsedUser.role === 'staff') {
+            navigate('/staff-dashboard'); // Redirect incorrect role
+            return;
+        } else if (parsedUser.role === 'admin') {
+            navigate('/admin-dashboard');
+            return;
+        } else if (parsedUser.role !== 'student' && parsedUser.role !== 'alumni') {
+            navigate('/login'); // Unknown role
+            return;
+        }
+
+        setUser(parsedUser);
     }, [navigate]);
 
     if (!user) return null;
