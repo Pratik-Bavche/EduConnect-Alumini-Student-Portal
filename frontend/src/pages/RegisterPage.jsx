@@ -32,8 +32,50 @@ const RegisterPage = () => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
+    const validateStep = (currentStep) => {
+        if (currentStep === 1) {
+            if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.phone.trim()) {
+                toast.error("Please fill in all fields (Name, Email, Phone)");
+                return false;
+            }
+        }
+        if (currentStep === 2) {
+            if (formData.role === 'student') {
+                if (!formData.rollNo.trim() || !formData.year || !formData.division.trim()) {
+                    toast.error("Please fill in all academic details");
+                    return false;
+                }
+            } else {
+                if (!formData.department.trim() || !formData.designation.trim()) {
+                    toast.error("Please fill in all staff details");
+                    return false;
+                }
+            }
+        }
+        if (currentStep === 3) {
+            if (!formData.password || !formData.confirmPassword) {
+                toast.error("Please create a password");
+                return false;
+            }
+            if (formData.password !== formData.confirmPassword) {
+                toast.error("Passwords do not match");
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const handleNext = () => {
+        if (validateStep(step)) {
+            setStep(step + 1);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateStep(3)) return;
+
         setIsLoading(true);
 
         // Prepare payload: Combine firstName/lastName into 'name'
@@ -109,7 +151,7 @@ const RegisterPage = () => {
                             <Label htmlFor="phone">Phone Number</Label>
                             <Input id="phone" type="tel" placeholder="+1 234 567 890" value={formData.phone} onChange={handleChange} required />
                         </div>
-                        <Button type="button" className="w-full mt-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all cursor-pointer" onClick={() => setStep(2)}>
+                        <Button type="button" className="w-full mt-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all cursor-pointer" onClick={handleNext}>
                             Next: Academic Info
                         </Button>
                     </div>
@@ -169,7 +211,7 @@ const RegisterPage = () => {
 
                         <div className="flex gap-3 mt-2">
                             <Button type="button" variant="outline" className="w-1/3 rounded-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-600 transition-all cursor-pointer" onClick={() => setStep(1)}>Back</Button>
-                            <Button type="button" className="w-2/3 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all cursor-pointer" onClick={() => setStep(3)}>Next: Security</Button>
+                            <Button type="button" className="w-2/3 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all cursor-pointer" onClick={handleNext}>Next: Security</Button>
                         </div>
                     </div>
                 );
