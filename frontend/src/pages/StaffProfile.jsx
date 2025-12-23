@@ -203,7 +203,7 @@ const StaffProfile = () => {
                         </CardContent>
                         {isEditing && (
                             <CardFooter className="bg-gray-50/50 p-4 flex justify-end">
-                                <Button onClick={handleSave} disabled={isLoading} className="w-full md:w-auto">
+                                <Button onClick={handleSave} disabled={isLoading} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
                                     {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                                     <Save className="w-4 h-4 mr-2" /> Save Changes
                                 </Button>

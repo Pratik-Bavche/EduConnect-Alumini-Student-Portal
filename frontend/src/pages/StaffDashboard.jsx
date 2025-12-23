@@ -64,7 +64,7 @@ const StaffDashboard = () => {
                 ? 'bg-blue-600 text-white'
                 : disabled
                     ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600 cursor-pointer'
                 }`}
         >
             {icon}
@@ -75,19 +75,20 @@ const StaffDashboard = () => {
 
     const PendingStateView = () => (
         <div className="flex flex-col items-center justify-center h-[80vh] text-center p-6">
-            <div className="bg-yellow-100 p-6 rounded-full mb-6">
+            <div className="bg-yellow-100 p-6 rounded-full mb-6 animate-pulse">
                 <ShieldAlert className="w-16 h-16 text-yellow-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Account Verification Pending</h1>
             <p className="text-lg text-gray-500 max-w-lg mb-8">
-                Welcome, {user.name}. Your staff account is currently under admin verification.
-                You will get access to student approvals and class management once verified.
+                Welcome, {user.name}. Your staff account is currently under verification by the Admin.
+                <br /><br />
+                You will receive full access to manage students and classes once approved.
             </p>
             <div className="flex gap-4">
-                <Button variant="outline" onClick={() => navigate('/help')}>
+                <Button variant="outline" className="cursor-pointer" onClick={() => navigate('/help')}>
                     Contact Admin
                 </Button>
-                <Button variant="destructive" onClick={handleLogout}>
+                <Button variant="destructive" className="cursor-pointer" onClick={handleLogout}>
                     <LogOut className="w-4 h-4 mr-2" /> Logout
                 </Button>
             </div>
@@ -102,84 +103,98 @@ const StaffDashboard = () => {
     ];
 
     const DashboardHome = () => (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* 1. Pending Student Requests */}
-            <Card className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-yellow-500" onClick={() => setActiveTab('requests')}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">Pending Requests</CardTitle>
-                    <UserCheck className="w-5 h-5 text-yellow-500" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">12</div>
-                    <p className="text-xs text-gray-500 mt-1">Students awaiting approval</p>
-                    <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">View Requests &rarr;</Button>
-                </CardContent>
-            </Card>
+        <div className="space-y-6">
+            {!isApproved && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md shadow-sm mb-6 flex items-start gap-4">
+                    <ShieldAlert className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
+                    <div>
+                        <h3 className="font-bold text-yellow-800">Account Verification Pending</h3>
+                        <p className="text-yellow-700 text-sm mt-1">
+                            Your account is currently under verification by the Admin. You cannot access features or manage students until approved.
+                        </p>
+                    </div>
+                </div>
+            )}
 
-            {/* 2. Approved Students */}
-            <Card className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-green-500" onClick={() => setActiveTab('approved')}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">Approved Students</CardTitle>
-                    <Users className="w-5 h-5 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">48</div>
-                    <p className="text-xs text-gray-500 mt-1">Total Verified in Class</p>
-                    <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">View List &rarr;</Button>
-                </CardContent>
-            </Card>
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${!isApproved ? 'opacity-60 pointer-events-none' : ''}`}>
+                {/* 1. Pending Student Requests */}
+                <Card className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-yellow-500" onClick={() => setActiveTab('requests')}>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">Pending Requests</CardTitle>
+                        <UserCheck className="w-5 h-5 text-yellow-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">12</div>
+                        <p className="text-xs text-gray-500 mt-1">Students awaiting approval</p>
+                        <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">View Requests &rarr;</Button>
+                    </CardContent>
+                </Card>
 
-            {/* 3. Upload Roll Number List */}
-            <Card className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-blue-500" onClick={() => setActiveTab('upload')}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">Upload Roll List</CardTitle>
-                    <Upload className="w-5 h-5 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">Upload</div>
-                    <p className="text-xs text-gray-500 mt-1">Official Excel for auto-verification</p>
-                    <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">Upload Excel &rarr;</Button>
-                </CardContent>
-            </Card>
+                {/* 2. Approved Students */}
+                <Card className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-green-500" onClick={() => setActiveTab('approved')}>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">Approved Students</CardTitle>
+                        <Users className="w-5 h-5 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">48</div>
+                        <p className="text-xs text-gray-500 mt-1">Total Verified in Class</p>
+                        <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">View List &rarr;</Button>
+                    </CardContent>
+                </Card>
 
-            {/* 4. Recent Activities */}
-            <Card className="hover:shadow-lg transition-all border-l-4 border-l-purple-500">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">Recent Activity</CardTitle>
-                    <Activity className="w-5 h-5 text-purple-500" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-sm font-medium">Rahul Sharma Approved</div>
-                    <p className="text-xs text-gray-500 mt-1">2 mins ago</p>
-                    <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">View Activity &rarr;</Button>
-                </CardContent>
-            </Card>
+                {/* 3. Upload Roll Number List */}
+                <Card className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-blue-500" onClick={() => setActiveTab('upload')}>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">Upload Roll List</CardTitle>
+                        <Upload className="w-5 h-5 text-blue-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">Upload</div>
+                        <p className="text-xs text-gray-500 mt-1">Official Excel for auto-verification</p>
+                        <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">Upload Excel &rarr;</Button>
+                    </CardContent>
+                </Card>
 
-            {/* 5. Messages / Notifications */}
-            <Card className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-red-500" onClick={() => setActiveTab('messages')}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">Messages</CardTitle>
-                    <Bell className="w-5 h-5 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">3</div>
-                    <p className="text-xs text-gray-500 mt-1">New system alerts</p>
-                    <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">Open Messages &rarr;</Button>
-                </CardContent>
-            </Card>
+                {/* 4. Recent Activities */}
+                <Card className="hover:shadow-lg transition-all border-l-4 border-l-purple-500 cursor-pointer">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">Recent Activity</CardTitle>
+                        <Activity className="w-5 h-5 text-purple-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-sm font-medium">Rahul Sharma Approved</div>
+                        <p className="text-xs text-gray-500 mt-1">2 mins ago</p>
+                        <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">View Activity &rarr;</Button>
+                    </CardContent>
+                </Card>
 
-            {/* 6. My Assigned Class */}
-            <Card className="hover:shadow-lg transition-all border-l-4 border-l-indigo-500 bg-gray-50">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">My Assigned Class</CardTitle>
-                    <BookOpen className="w-5 h-5 text-indigo-500" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-lg font-bold">{user.assignedClass || "Not Assigned"}</div>
-                    <p className="text-xs text-gray-500 mt-1">{user.department}</p>
-                    <p className="text-xs text-gray-400 mt-2">Read-only information</p>
-                </CardContent>
-            </Card>
+                {/* 5. Messages / Notifications */}
+                <Card className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-red-500" onClick={() => setActiveTab('messages')}>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">Messages</CardTitle>
+                        <Bell className="w-5 h-5 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">3</div>
+                        <p className="text-xs text-gray-500 mt-1">New system alerts</p>
+                        <Button variant="link" className="px-0 text-blue-600 h-auto mt-2">Open Messages &rarr;</Button>
+                    </CardContent>
+                </Card>
+
+                {/* 6. My Assigned Class */}
+                <Card className="hover:shadow-lg transition-all border-l-4 border-l-indigo-500 bg-gray-50 cursor-pointer">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-500">My Assigned Class</CardTitle>
+                        <BookOpen className="w-5 h-5 text-indigo-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-lg font-bold">{user.assignedClass || "Not Assigned"}</div>
+                        <p className="text-xs text-gray-500 mt-1">{user.department}</p>
+                        <p className="text-xs text-gray-400 mt-2">Read-only information</p>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 
@@ -281,13 +296,7 @@ const StaffDashboard = () => {
 
     // --- Main Render ---
 
-    if (!isApproved) {
-        return (
-            <div className="min-h-screen bg-gray-50">
-                <PendingStateView />
-            </div>
-        );
-    }
+    // Removed blocking check to allow dashboard access with disabled features
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -298,10 +307,10 @@ const StaffDashboard = () => {
                 </div>
                 <div className="p-4 space-y-2">
                     <SidebarItem icon={<LayoutDashboard size={20} />} label="Dashboard" id="dashboard" />
-                    <SidebarItem icon={<UserCheck size={20} />} label="Student Requests" id="requests" />
-                    <SidebarItem icon={<Upload size={20} />} label="Upload Roll List" id="upload" />
-                    <SidebarItem icon={<Users size={20} />} label="Approved Students" id="approved" />
-                    <SidebarItem icon={<MessageSquare size={20} />} label="Messages" id="messages" />
+                    <SidebarItem icon={<UserCheck size={20} />} label="Student Requests" id="requests" disabled={!isApproved} />
+                    <SidebarItem icon={<Upload size={20} />} label="Upload Roll List" id="upload" disabled={!isApproved} />
+                    <SidebarItem icon={<Users size={20} />} label="Approved Students" id="approved" disabled={!isApproved} />
+                    <SidebarItem icon={<MessageSquare size={20} />} label="Messages" id="messages" disabled={!isApproved} />
                 </div>
                 <div className="absolute bottom-0 w-full p-4 border-t border-gray-100">
                     <Button variant="ghost" className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50" onClick={handleLogout}>
