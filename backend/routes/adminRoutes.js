@@ -20,23 +20,25 @@ router.get('/pending-staff', async (req, res) => {
 // @desc    Approve staff and assign year
 // @access  Admin
 router.put('/approve-staff/:id', async (req, res) => {
+    console.log(`Received approve request for ID: ${req.params.id}`);
+    console.log('Body:', req.body);
     const { assignedYear } = req.body;
     try {
         const staff = await Staff.findById(req.params.id);
-        if (!staff) return res.status(404).json({ message: 'Staff not found' });
+        if (!staff) {
+            console.log('Staff not found in DB');
+            return res.status(404).json({ message: 'Staff not found' });
+        }
 
         staff.status = 'approved';
         staff.isVerified = true;
         staff.assignedYear = assignedYear;
-        // staff.assignedClass = assignedClass; // If we use this too
-
-        // Also update the 'assignedClass' field for backward compatibility/display 
-        // Logic: if assignedYear is "3rd Year", maybe assignedClass is "TE" or just store year.
-        // For now, simpler is keeping it consistent.
 
         await staff.save();
+        console.log('Staff approved successfully');
         res.json({ message: 'Staff approved successfully', staff });
     } catch (error) {
+        console.error('Error approving staff:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 });
