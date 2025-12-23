@@ -40,6 +40,8 @@ const LoginPage = () => {
                     navigate('/student-dashboard');
                 } else if (data.role === 'staff') {
                     navigate('/staff-dashboard');
+                } else if (data.role === 'admin') {
+                    navigate('/admin-dashboard');
                 } else {
                     navigate('/'); // Default fallback for now
                 }
