@@ -14,6 +14,31 @@ const generateToken = (id, role) => {
     return jwt.sign({ id, role }, JWT_SECRET, { expiresIn: '30d' });
 };
 
+// Seed Default Admin (One-time setup for demo)
+const seedDefaultAdmin = async () => {
+    try {
+        const defaultEmail = 'admin@admin.com';
+        const exists = await Admin.findOne({ email: defaultEmail });
+        if (!exists) {
+            console.log('Seeding default admin...');
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash('admin', salt); // Default password 'admin'
+            await Admin.create({
+                name: 'Default Admin',
+                email: defaultEmail,
+                password: hashedPassword,
+                role: 'admin',
+                institution: 'DYPCOE'
+            });
+            console.log('Default Admin Created: admin@admin.com / admin');
+        }
+    } catch (err) {
+        console.error('Error seeding default admin:', err.message);
+    }
+};
+// Execute seeding
+seedDefaultAdmin();
+
 // @route   POST /api/auth/register
 // @desc    Register User (Student, Staff, or Admin)
 // @access  Public

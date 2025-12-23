@@ -4,12 +4,13 @@ const adminSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, default: 'admin' },
-
-    // Admin specific fields
-    department: { type: String },
-
-    createdAt: { type: Date, default: Date.now }
+    role: { type: String, default: 'admin', enum: ['admin', 'superadmin'] }, // Enforce role
+    institution: { type: String, default: 'DYPCOE' },
+    isVerified: { type: Boolean, default: true }, // Admins usually auto-verified
+    createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model('Admin', adminSchema);
+// Helper model
+const Admin = mongoose.model('Admin', adminSchema);
+
+export default Admin;
