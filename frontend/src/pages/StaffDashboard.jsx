@@ -30,6 +30,7 @@ const StaffDashboard = () => {
     const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [selectedDivision, setSelectedDivision] = useState('A');
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -109,8 +110,6 @@ const StaffDashboard = () => {
         { id: 3, roll: '3B05', name: 'Amit Kumar', year: '3rd Year', div: 'B', status: 'Pending' },
         { id: 4, roll: '2A10', name: 'Sneha Gupta', year: '2nd Year', div: 'A', status: 'Pending' }, // Should be filtered out if teacher is 3rd Year
     ];
-
-    const [selectedDivision, setSelectedDivision] = useState('A');
 
     const StudentRequestsView = () => {
         // Filter students based on Assigned Year and Selected Division
