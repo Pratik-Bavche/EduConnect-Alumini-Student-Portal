@@ -52,11 +52,20 @@ const AdminDashboard = () => {
     };
 
     // --- Mock Data ---
-    const pendingStaff = [
-        { id: 1, name: 'Mr. Amit Verma', email: 'amit@dypcoe.edu', dept: 'CSE', role: 'Staff', status: 'Pending' },
-        { id: 2, name: 'Ms. Priya Singh', email: 'priya@dypcoe.edu', dept: 'ENTC', role: 'Staff', status: 'Pending' },
-        { id: 3, name: 'Dr. R.K. Patil', email: 'rkpatil@dypcoe.edu', dept: 'Mech', role: 'Staff', status: 'Pending' },
-    ];
+    const [pendingStaff, setPendingStaff] = useState([
+        { id: 1, name: 'Mr. Amit Verma', email: 'amit@dypcoe.edu', dept: 'CSE', role: 'Staff', status: 'Pending', assignedYear: '3rd Year' },
+        { id: 2, name: 'Ms. Priya Singh', email: 'priya@dypcoe.edu', dept: 'ENTC', role: 'Staff', status: 'Pending', assignedYear: '2nd Year' },
+        { id: 3, name: 'Dr. R.K. Patil', email: 'rkpatil@dypcoe.edu', dept: 'Mech', role: 'Staff', status: 'Pending', assignedYear: '4th Year' },
+    ]);
+
+    const handleAssignYearChange = (id, newYear) => {
+        setPendingStaff(pendingStaff.map(s => s.id === id ? { ...s, assignedYear: newYear } : s));
+    };
+
+    const handleApprove = (staff) => {
+        toast.success(`Approved ${staff.name} for ${staff.assignedYear}`);
+        // Here you would API call to update status='approved' and assignedYear=staff.assignedYear
+    };
 
     // --- Components ---
 
@@ -176,6 +185,7 @@ const AdminDashboard = () => {
                             <TableHead>Email</TableHead>
                             <TableHead>Department</TableHead>
                             <TableHead>Role</TableHead>
+                            <TableHead>Assign Year</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
@@ -188,12 +198,24 @@ const AdminDashboard = () => {
                                 <TableCell>{staff.dept}</TableCell>
                                 <TableCell>{staff.role}</TableCell>
                                 <TableCell>
+                                    <select
+                                        className="border rounded px-2 py-1 text-sm bg-white"
+                                        value={staff.assignedYear}
+                                        onChange={(e) => handleAssignYearChange(staff.id, e.target.value)}
+                                    >
+                                        <option value="1st Year">1st Year</option>
+                                        <option value="2nd Year">2nd Year</option>
+                                        <option value="3rd Year">3rd Year</option>
+                                        <option value="4th Year">4th Year</option>
+                                    </select>
+                                </TableCell>
+                                <TableCell>
                                     <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
                                         {staff.status}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right space-x-2">
-                                    <Button size="sm" className="bg-green-600 hover:bg-green-700 h-8">
+                                    <Button size="sm" className="bg-green-600 hover:bg-green-700 h-8" onClick={() => handleApprove(staff)}>
                                         <CheckCircle className="w-4 h-4 mr-1" /> Approve
                                     </Button>
                                     <Button size="sm" variant="destructive" className="h-8">

@@ -95,12 +95,99 @@ const StaffDashboard = () => {
         </div>
     );
 
-    // Mock Data for Pending Requests
+    // Mock Data for Pending Requests (Updated with consistent Year format)
     const mockRequests = [
-        { id: 1, roll: '3A01', name: 'Rahul Sharma', year: '3rd', div: 'A', status: 'Pending' },
-        { id: 2, roll: '3A02', name: 'Priya Patel', year: '3rd', div: 'A', status: 'Pending' },
-        { id: 3, roll: '3A05', name: 'Amit Kumar', year: '3rd', div: 'A', status: 'Pending' },
+        { id: 1, roll: '3A01', name: 'Rahul Sharma', year: '3rd Year', div: 'A', status: 'Pending' },
+        { id: 2, roll: '3A02', name: 'Priya Patel', year: '3rd Year', div: 'A', status: 'Pending' },
+        { id: 3, roll: '3B05', name: 'Amit Kumar', year: '3rd Year', div: 'B', status: 'Pending' },
+        { id: 4, roll: '2A10', name: 'Sneha Gupta', year: '2nd Year', div: 'A', status: 'Pending' }, // Should be filtered out if teacher is 3rd Year
     ];
+
+    const [selectedDivision, setSelectedDivision] = useState('A');
+
+    const StudentRequestsView = () => {
+        // Filter students based on Assigned Year and Selected Division
+        const assignedYear = user.assignedYear || '3rd Year'; // Default or Fallback
+        const filteredRequests = mockRequests.filter(req =>
+            req.year === assignedYear &&
+            (selectedDivision === 'All' || req.div === selectedDivision)
+        );
+
+        return (
+            <div className="space-y-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold">Student Verification Requests</h2>
+                        <p className="text-sm text-gray-500">Showing requests for: <span className="font-semibold text-blue-600">{assignedYear}</span></p>
+                    </div>
+
+                    <div className="flex gap-2 w-full md:w-auto items-center">
+                        <div className="relative flex-1 md:w-64">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                            <Input placeholder="Search by Roll No..." className="pl-9" />
+                        </div>
+
+                        {/* Division Filter */}
+                        <select
+                            className="h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background cursor-pointer"
+                            value={selectedDivision}
+                            onChange={(e) => setSelectedDivision(e.target.value)}
+                        >
+                            <option value="A">Div A</option>
+                            <option value="B">Div B</option>
+                            <option value="C">Div C</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Roll No</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Year</TableHead>
+                                <TableHead>Division</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredRequests.length > 0 ? (
+                                filteredRequests.map((req) => (
+                                    <TableRow key={req.id}>
+                                        <TableCell className="font-medium">{req.roll}</TableCell>
+                                        <TableCell>{req.name}</TableCell>
+                                        <TableCell>{req.year}</TableCell>
+                                        <TableCell>{req.div}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                                                {req.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right space-x-2">
+                                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                                                <CheckCircle className="w-4 h-4 mr-1" /> Approve
+                                            </Button>
+                                            <Button size="sm" variant="destructive">
+                                                <XCircle className="w-4 h-4 mr-1" /> Reject
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                                        No pending requests found for {assignedYear} - Division {selectedDivision}
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+        );
+    };
 
     const DashboardHome = () => (
         <div className="space-y-6">
@@ -198,57 +285,7 @@ const StaffDashboard = () => {
         </div>
     );
 
-    const StudentRequestsView = () => (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 className="text-2xl font-bold">Student Verification Requests</h2>
-                <div className="flex gap-2 w-full md:w-auto">
-                    <div className="relative flex-1 md:w-64">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                        <Input placeholder="Search by Roll No..." className="pl-9" />
-                    </div>
-                </div>
-            </div>
 
-            <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Roll No</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Year</TableHead>
-                            <TableHead>Division</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {mockRequests.map((req) => (
-                            <TableRow key={req.id}>
-                                <TableCell className="font-medium">{req.roll}</TableCell>
-                                <TableCell>{req.name}</TableCell>
-                                <TableCell>{req.year}</TableCell>
-                                <TableCell>{req.div}</TableCell>
-                                <TableCell>
-                                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                                        {req.status}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-right space-x-2">
-                                    <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                                        <CheckCircle className="w-4 h-4 mr-1" /> Approve
-                                    </Button>
-                                    <Button size="sm" variant="destructive">
-                                        <XCircle className="w-4 h-4 mr-1" /> Reject
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-        </div>
-    );
 
     const UploadRollView = () => (
         <div className="max-w-2xl mx-auto space-y-8">

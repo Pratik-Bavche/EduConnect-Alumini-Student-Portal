@@ -10,7 +10,7 @@ const staffSchema = new mongoose.Schema({
     department: { type: String, required: true },
     designation: { type: String, required: true },
     staffId: { type: String, required: true, unique: true },
-    assignedClass: { type: String }, // e.g. "TE - A"
+    assignedYear: { type: String }, // e.g. "1st Year", "2nd Year", "3rd Year", "4th Year"
     status: { type: String, default: 'pending', enum: ['pending', 'approved', 'rejected'] },
 
     isVerified: { type: Boolean, default: false },
