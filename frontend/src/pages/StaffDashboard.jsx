@@ -31,6 +31,57 @@ const StaffDashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [selectedDivision, setSelectedDivision] = useState('A');
+    const [studentRequests, setStudentRequests] = useState([]);
+
+    const fetchStudentRequests = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/staff/pending-students');
+            if (res.ok) {
+                const data = await res.json();
+                setStudentRequests(data);
+            }
+        } catch (error) {
+            console.error("Error fetching students:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (user) {
+            fetchStudentRequests();
+        }
+    }, [user]);
+
+    const handleApproveStudent = async (studentId) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/staff/approve-student/${studentId}`, {
+                method: 'PUT'
+            });
+            if (res.ok) {
+                toast.success("Student Verified Successfully");
+                setStudentRequests(prev => prev.filter(s => s._id !== studentId));
+            } else {
+                toast.error("Failed to approve student");
+            }
+        } catch (e) {
+            toast.error("Server Error");
+        }
+    };
+
+    const handleRejectStudent = async (studentId) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/staff/reject-student/${studentId}`, {
+                method: 'PUT'
+            });
+            if (res.ok) {
+                toast.success("Student Request Rejected");
+                setStudentRequests(prev => prev.filter(s => s._id !== studentId));
+            } else {
+                toast.error("Failed to reject student");
+            }
+        } catch (e) {
+            toast.error("Server Error");
+        }
+    };
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -103,20 +154,16 @@ const StaffDashboard = () => {
         </div>
     );
 
-    // Mock Data for Pending Requests (Updated with consistent Year format)
-    const mockRequests = [
-        { id: 1, roll: '3A01', name: 'Rahul Sharma', year: '3rd Year', div: 'A', status: 'Pending' },
-        { id: 2, roll: '3A02', name: 'Priya Patel', year: '3rd Year', div: 'A', status: 'Pending' },
-        { id: 3, roll: '3B05', name: 'Amit Kumar', year: '3rd Year', div: 'B', status: 'Pending' },
-        { id: 4, roll: '2A10', name: 'Sneha Gupta', year: '2nd Year', div: 'A', status: 'Pending' }, // Should be filtered out if teacher is 3rd Year
-    ];
-
     const StudentRequestsView = () => {
         // Filter students based on Assigned Year and Selected Division
         const assignedYear = user.assignedYear || '3rd Year'; // Default or Fallback
-        const filteredRequests = mockRequests.filter(req =>
+
+        // Filter Logic:
+        // 1. Must match teacher's assignedYear
+        // 2. Must match selected division (or All)
+        const filteredRequests = studentRequests.filter(req =>
             req.year === assignedYear &&
-            (selectedDivision === 'All' || req.div === selectedDivision)
+            (selectedDivision === 'All' || req.division === selectedDivision)
         );
 
         return (
@@ -161,21 +208,21 @@ const StaffDashboard = () => {
                         <TableBody>
                             {filteredRequests.length > 0 ? (
                                 filteredRequests.map((req) => (
-                                    <TableRow key={req.id}>
-                                        <TableCell className="font-medium">{req.roll}</TableCell>
+                                    <TableRow key={req._id}>
+                                        <TableCell className="font-medium">{req.rollNo}</TableCell>
                                         <TableCell>{req.name}</TableCell>
                                         <TableCell>{req.year}</TableCell>
-                                        <TableCell>{req.div}</TableCell>
+                                        <TableCell>{req.division}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                                                {req.status}
+                                                Pending
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right space-x-2">
-                                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                                            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApproveStudent(req._id)} >
                                                 <CheckCircle className="w-4 h-4 mr-1" /> Approve
                                             </Button>
-                                            <Button size="sm" variant="destructive">
+                                            <Button size="sm" variant="destructive" onClick={() => handleRejectStudent(req._id)}>
                                                 <XCircle className="w-4 h-4 mr-1" /> Reject
                                             </Button>
                                         </TableCell>
