@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +9,9 @@ import { toast } from "sonner";
 
 const LoginPage = () => {
     const navigate = useNavigate();
+    const location = useLocation(); // Add this
     const [isLoading, setIsLoading] = useState(false);
-    const [role, setRole] = useState('student'); // 'student' | 'staff' | 'admin'
+    const [role, setRole] = useState(location.state?.role || 'student'); // Use passed state or default to 'student'
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -34,7 +35,14 @@ const LoginPage = () => {
                 localStorage.setItem('user', JSON.stringify(data));
 
                 toast.success(`Login Successful! Welcome ${data.name}`);
-                navigate('/'); // Redirect to Dashboard/Home
+
+                if (data.role === 'student' || data.role === 'alumni') {
+                    navigate('/student-dashboard');
+                } else if (data.role === 'staff') {
+                    navigate('/staff-dashboard');
+                } else {
+                    navigate('/'); // Default fallback for now
+                }
             } else {
                 toast.error(data.message || "Invalid credentials");
             }
@@ -63,7 +71,9 @@ const LoginPage = () => {
                     <div className="mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-2">
                         <GraduationCap className="h-6 w-6 text-primary" />
                     </div>
-                    <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+                    <CardTitle className="text-2xl font-bold">
+                        {role === 'admin' ? 'Admin Login' : role === 'staff' ? 'Faculty Login' : 'Student Login'}
+                    </CardTitle>
                     <CardDescription>
                         Enter your credentials to access the portal
                     </CardDescription>
@@ -78,7 +88,7 @@ const LoginPage = () => {
                                     type="button"
                                     onClick={() => setRole(r)}
                                     className={`text-sm font-medium py-1.5 rounded-md transition-all cursor-pointer ${role === r
-                                        ? 'bg-background shadow-sm text-foreground'
+                                        ? 'bg-background shadow-sm text-foreground border-2 border-blue-600'
                                         : 'text-muted-foreground hover:text-foreground'
                                         }`}
                                 >
@@ -93,7 +103,13 @@ const LoginPage = () => {
                             </Label>
                             <Input
                                 id="email"
-                                placeholder={role === 'student' ? "e.g. 3A01 or student@example.com" : "admin@college.edu"}
+                                placeholder={
+                                    role === 'student'
+                                        ? "e.g. 3A01 or student@example.com"
+                                        : role === 'staff'
+                                            ? "staff@gmail.com"
+                                            : "admin@college.edu"
+                                }
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -129,20 +145,20 @@ const LoginPage = () => {
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 text-center text-sm text-muted-foreground">
-                    {role === 'student' && (
+                    {(role === 'student' || role === 'staff') && (
                         <p>
                             Don't have an account?{" "}
                             <button
-                                onClick={() => navigate('/register')}
+                                onClick={() => navigate('/register', { state: { role } })}
                                 className="text-primary font-medium hover:underline hover:text-blue-700 cursor-pointer transition-colors"
                             >
                                 Register here
                             </button>
                         </p>
                     )}
-                    {role !== 'student' && (
+                    {role === 'admin' && (
                         <p className="text-xs">
-                            Admin & Staff accounts are created by the organization.
+                            Admin accounts are created by the organization.
                         </p>
                     )}
                 </CardFooter>

@@ -12,6 +12,16 @@ const studentSchema = new mongoose.Schema({
     division: { type: String, required: true },
     prn: { type: String },
     branch: { type: String },
+    department: { type: String },
+    phone: { type: String },
+    location: { type: String },
+    gradYear: { type: String },
+
+    // Career / Alumni Details
+    company: { type: String },
+    position: { type: String },
+    skills: { type: String },
+    linkedin: { type: String },
 
     isVerified: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }

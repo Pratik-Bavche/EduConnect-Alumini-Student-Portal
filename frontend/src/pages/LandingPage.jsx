@@ -20,7 +20,7 @@ const LandingPage = () => {
                         </span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost" className="rounded-full cursor-pointer hover:bg-blue-50 text-base font-medium" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
+                        <Button variant="outline" className="rounded-full cursor-pointer bg-white hover:bg-white hover:border-blue-600 text-base font-medium border border-gray-200 transition-colors" onClick={() => navigate('/about')}>
                             About Platform
                         </Button>
                     </div>

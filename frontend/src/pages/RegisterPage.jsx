@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,12 +9,13 @@ import { toast } from "sonner";
 
 const RegisterPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [step, setStep] = useState(1); // 1: Basic Info, 2: Academic Info, 3: Password
     const [isLoading, setIsLoading] = useState(false);
 
     // Form State (Simplified)
     const [formData, setFormData] = useState({
-        role: 'student', // 'student' | 'staff'
+        role: location.state?.role || 'student', // 'student' | 'staff'
         firstName: '',
         lastName: '',
         email: '',
@@ -24,6 +25,7 @@ const RegisterPage = () => {
         division: '', // Student only
         department: '', // Staff only
         designation: '', // Staff only
+        staffId: '', // Staff only
         password: '',
         confirmPassword: ''
     });
@@ -34,8 +36,30 @@ const RegisterPage = () => {
 
     const validateStep = (currentStep) => {
         if (currentStep === 1) {
+            // Check for empty fields
             if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.phone.trim()) {
                 toast.error("Please fill in all fields (Name, Email, Phone)");
+                return false;
+            }
+
+            // Name validation (only letters)
+            const nameRegex = /^[A-Za-z\s]+$/;
+            if (!nameRegex.test(formData.firstName) || !nameRegex.test(formData.lastName)) {
+                toast.error("Names must contain only letters");
+                return false;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.email)) {
+                toast.error("Please enter a valid email address");
+                return false;
+            }
+
+            // Phone validation (digits only, e.g., 10-15 chars)
+            const phoneRegex = /^\d{10,15}$/;
+            if (!phoneRegex.test(formData.phone)) {
+                toast.error("Please enter a valid phone number (10-15 digits)");
                 return false;
             }
         }
@@ -46,8 +70,8 @@ const RegisterPage = () => {
                     return false;
                 }
             } else {
-                if (!formData.department.trim() || !formData.designation.trim()) {
-                    toast.error("Please fill in all staff details");
+                if (!formData.department.trim() || !formData.designation.trim() || !formData.staffId.trim()) {
+                    toast.error("Please fill in all staff details including Staff ID");
                     return false;
                 }
             }
@@ -97,7 +121,7 @@ const RegisterPage = () => {
 
             if (response.ok) {
                 toast.success("Registration Successful! Please login.");
-                navigate('/login');
+                navigate('/login', { state: { role: formData.role } });
             } else {
                 toast.error(data.message || "Registration failed");
             }
@@ -120,14 +144,14 @@ const RegisterPage = () => {
                             <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, role: 'student' })}
-                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${formData.role === 'student' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all cursor-pointer ${formData.role === 'student' ? 'bg-background shadow-sm text-primary border-2 border-blue-600' : 'text-muted-foreground hover:text-foreground'}`}
                             >
                                 Student / Alumni
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, role: 'staff' })}
-                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${formData.role === 'staff' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all cursor-pointer ${formData.role === 'staff' ? 'bg-background shadow-sm text-primary border-2 border-blue-600' : 'text-muted-foreground hover:text-foreground'}`}
                             >
                                 Faculty / Staff
                             </button>
@@ -205,6 +229,10 @@ const RegisterPage = () => {
                                         <Label htmlFor="designation">Designation</Label>
                                         <Input id="designation" placeholder="e.g. Assistant Professor" value={formData.designation} onChange={handleChange} required />
                                     </div>
+                                    <div className="space-y-2 mt-4">
+                                        <Label htmlFor="staffId">Staff ID</Label>
+                                        <Input id="staffId" placeholder="e.g. FAC12345" value={formData.staffId} onChange={handleChange} required />
+                                    </div>
                                 </>
                             )}
                         </div>
@@ -254,9 +282,11 @@ const RegisterPage = () => {
 
             <Card className="w-full max-w-lg border-border/50 shadow-xl bg-background/95 backdrop-blur">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold">Student Registration</CardTitle>
+                    <CardTitle className="text-2xl font-bold">
+                        {formData.role === 'student' ? 'Student Registration' : 'Faculty Registration'}
+                    </CardTitle>
                     <CardDescription>
-                        Join the Alumni network. Step {step} of 3.
+                        Join the {formData.role === 'student' ? 'Student' : 'Faculty'} network. Step {step} of 3.
                     </CardDescription>
                     {/* Progress Bar */}
                     <div className="w-full bg-secondary h-1.5 mt-2 rounded-full overflow-hidden">

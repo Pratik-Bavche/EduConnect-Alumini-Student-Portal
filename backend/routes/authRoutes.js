@@ -60,11 +60,11 @@ router.post('/register', async (req, res) => {
         console.log('User saved successfully:', user);
 
         if (user) {
+            const userResponse = user.toObject();
+            delete userResponse.password;
+
             res.status(201).json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
+                ...userResponse,
                 token: generateToken(user._id, user.role),
             });
         } else {
@@ -106,11 +106,11 @@ router.post('/login', async (req, res) => {
         }
 
         if (user && (await bcrypt.compare(password, user.password))) {
+            const userResponse = user.toObject();
+            delete userResponse.password;
+
             res.json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
+                ...userResponse,
                 token: generateToken(user._id, user.role),
             });
         } else {
@@ -118,6 +118,49 @@ router.post('/login', async (req, res) => {
         }
     } catch (error) {
         console.error('Login Error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// @route   PUT /api/auth/profile
+// @desc    Update User Profile
+// @access  Private (Needs token ideally, but we'll use ID/Email for now or assume simple)
+// IMPORTANT: In a real app, use Middleware to verify JWT and get user ID from token
+router.put('/profile', async (req, res) => {
+    const { _id, role, ...updates } = req.body;
+
+    try {
+        if (!_id || !role) {
+            return res.status(400).json({ message: 'User ID and Role are required' });
+        }
+
+        let Model;
+        if (role === 'student') Model = Student;
+        else if (role === 'staff') Model = Staff;
+        else if (role === 'admin') Model = Admin;
+        else return res.status(400).json({ message: 'Invalid Role' });
+
+        // Remove password from updates if it exists to prevent accidental overwrite (handle password separately)
+        delete updates.password;
+
+        const updatedUser = await Model.findByIdAndUpdate(
+            _id,
+            { $set: updates },
+            { new: true, runValidators: true } // Return new doc, run schema validators
+        ).select('-password'); // Exclude password from result
+
+        if (updatedUser) {
+            const userResponse = updatedUser.toObject();
+            delete userResponse.password;
+
+            // Keep the token as is (or generate new one if roles changed, but purely profile update usually doesn't need new token)
+            res.json(userResponse);
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+
+    } catch (error) {
+        console.error('Update Profile Error:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 });
