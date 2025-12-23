@@ -30,11 +30,24 @@ const AdminDashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     // --- Mock Data ---
-    const [pendingStaff, setPendingStaff] = useState([
-        { id: 1, name: 'Mr. Amit Verma', email: 'amit@dypcoe.edu', dept: 'CSE', role: 'Staff', status: 'Pending', assignedYear: '3rd Year' },
-        { id: 2, name: 'Ms. Priya Singh', email: 'priya@dypcoe.edu', dept: 'ENTC', role: 'Staff', status: 'Pending', assignedYear: '2nd Year' },
-        { id: 3, name: 'Dr. R.K. Patil', email: 'rkpatil@dypcoe.edu', dept: 'Mech', role: 'Staff', status: 'Pending', assignedYear: '4th Year' },
-    ]);
+    const [pendingStaff, setPendingStaff] = useState([]);
+
+    useEffect(() => {
+        // Fetch Pending Staff
+        const fetchStaff = async () => {
+            try {
+                const res = await fetch('http://localhost:5000/api/admin/pending-staff');
+                if (res.ok) {
+                    const data = await res.json();
+                    // Add default assignedYear for UI state
+                    setPendingStaff(data.map(s => ({ ...s, assignedYear: '3rd Year' })));
+                }
+            } catch (err) {
+                console.error("Failed to fetch staff:", err);
+            }
+        };
+        fetchStaff();
+    }, []);
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -68,12 +81,27 @@ const AdminDashboard = () => {
 
 
     const handleAssignYearChange = (id, newYear) => {
-        setPendingStaff(pendingStaff.map(s => s.id === id ? { ...s, assignedYear: newYear } : s));
+        setPendingStaff(pendingStaff.map(s => s._id === id ? { ...s, assignedYear: newYear } : s));
     };
 
-    const handleApprove = (staff) => {
-        toast.success(`Approved ${staff.name} for ${staff.assignedYear}`);
-        // Here you would API call to update status='approved' and assignedYear=staff.assignedYear
+    const handleApprove = async (staff) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/admin/approve-staff/${staff._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assignedYear: staff.assignedYear })
+            });
+
+            if (res.ok) {
+                toast.success(`Approved ${staff.name} for ${staff.assignedYear}`);
+                setPendingStaff(pendingStaff.filter(s => s._id !== staff._id));
+            } else {
+                toast.error("Failed to approve staff");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Server connection failed");
+        }
     };
 
     // --- Components ---
@@ -201,16 +229,16 @@ const AdminDashboard = () => {
                     </TableHeader>
                     <TableBody>
                         {pendingStaff.map((staff) => (
-                            <TableRow key={staff.id}>
+                            <TableRow key={staff._id}>
                                 <TableCell className="font-medium">{staff.name}</TableCell>
                                 <TableCell>{staff.email}</TableCell>
-                                <TableCell>{staff.dept}</TableCell>
+                                <TableCell>{staff.department}</TableCell> {/* Note: schema says 'department' not 'dept' */}
                                 <TableCell>{staff.role}</TableCell>
                                 <TableCell>
                                     <select
                                         className="border rounded px-2 py-1 text-sm bg-white"
                                         value={staff.assignedYear}
-                                        onChange={(e) => handleAssignYearChange(staff.id, e.target.value)}
+                                        onChange={(e) => handleAssignYearChange(staff._id, e.target.value)}
                                     >
                                         <option value="1st Year">1st Year</option>
                                         <option value="2nd Year">2nd Year</option>
